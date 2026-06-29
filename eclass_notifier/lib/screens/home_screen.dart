@@ -106,6 +106,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _testChangeDetection() async {
+    // Seed a fake baseline that won't match real data
+    final fakeSlots = [
+      GroupSlot(name: '__TEST_SLOT__', current: '0', maximum: '99'),
+    ];
+    await StorageService.savePreviousSlots(fakeSlots);
+
+    // Fetch real current slots
+    final realSlots = await EclassService.fetchSlots(
+      widget.course.code,
+      widget.category.urlview,
+    );
+
+    // Run the same diff logic the poller uses
+    final changes = EclassService.diffSlots(fakeSlots, realSlots);
+
+    if (changes.isNotEmpty) {
+      await showNotification('eClass Group Change (TEST)', changes.join('\n'));
+    }
+
+    // Reseed with the real baseline so the next real poll isn't confused
+    await StorageService.savePreviousSlots(realSlots);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Test complete: ${changes.length} changes detected, baseline reset')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WithForegroundTask(
@@ -184,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       DropdownButton<int>(
                         value: _intervalMinutes,
                         isDense: true,
-                        items: const [5, 10, 15, 30, 60]
+                        items: const [1, 2, 5, 10, 15, 20, 30, 45, 60, 90, 120]
                             .map((m) => DropdownMenuItem(
                                   value: m,
                                   child: Text('$m min'),
@@ -238,6 +267,13 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            FloatingActionButton.small(
+              heroTag: 'test',
+              onPressed: _testChangeDetection,
+              backgroundColor: Colors.orange,
+              child: const Icon(Icons.science),
+            ),
+            const SizedBox(height: 8),
             FloatingActionButton.small(
               heroTag: 'refresh',
               onPressed: _loadSlots,
