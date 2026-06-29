@@ -204,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text('Category: ${widget.category.name}',
                       style: const TextStyle(fontSize: 12)),
                   if (_lastUpdated != null)
-                    Text('Last fetch: $_lastUpdated',
+                    Text('Last manual fetch: $_lastUpdated',
                         style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   const SizedBox(height: 8),
                   Row(

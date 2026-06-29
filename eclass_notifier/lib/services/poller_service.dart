@@ -153,12 +153,18 @@ class PollTaskHandler extends TaskHandler {
         return;
       }
 
-      // Successful poll — reset failure counter
+      // Successful poll - reset failure counter
       _consecutiveFailures = 0;
+
+      final now = DateTime.now();
+      final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
       if (_previousSlots.isEmpty) {
         _previousSlots = slots;
         await _savePreviousSlots();
+        FlutterForegroundTask.updateService(
+          notificationText: 'Last checked: $timeStr',
+        );
         return;
       }
 
@@ -166,7 +172,11 @@ class PollTaskHandler extends TaskHandler {
       if (changes.isNotEmpty) {
         await showNotification('eClass Group Change', changes.join('\n'));
         FlutterForegroundTask.updateService(
-          notificationText: 'Last change: ${changes.first}',
+          notificationText: 'Last change: ${changes.first} ($timeStr)',
+        );
+      } else {
+        FlutterForegroundTask.updateService(
+          notificationText: 'Last checked: $timeStr (No changes)',
         );
       }
 
