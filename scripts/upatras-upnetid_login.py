@@ -6,7 +6,7 @@ Install:
     pip install requests beautifulsoup4 python-dotenv
 
 Usage:
-    python upatras-upnetid-login.py
+    python upatras-upnetid_login.py
 """
 
 import os
